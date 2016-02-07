@@ -1,0 +1,23 @@
+#!/usr/bin/env ruby
+require 'port_map'
+
+port = ARGV[0]
+
+unless (1..65535).cover?(port.to_i)
+  raise 'a valid port number must be provided as the first argument'
+end
+
+server_conf = nil
+if File.exist?(PortMap::NginxConf::PORT_MAP_CONF_FILENAME)
+  server_conf = PortMap::NginxConf.from_file(port, File.new(PortMap::NginxConf::PORT_MAP_CONF_FILENAME))
+else
+  name = ARGV[1] || Dir.pwd.split('/').last
+  server_conf = PortMap::NginxConf.new(port, name)
+end
+server_conf.save
+
+PortMap::Hosts.update
+
+puts "Add proxy mapping http://127.0.0.1:#{server_conf.port}/ to http://#{server_conf.server_name}"
+
+PortMap::Nginx.reload

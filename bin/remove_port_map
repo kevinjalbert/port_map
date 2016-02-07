@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+require 'port_map'
+
+name = ARGV[0] || Dir.pwd.split('/').last
+
+port_map = PortMap::Mappings.all.detect do |element|
+  element[:name] == name
+end
+
+raise "There are no port-maps matching #{name}" if port_map.nil?
+raise "#{port_map[:nginx_conf]} does not exist" unless File.exist?(port_map[:nginx_conf])
+
+File.delete(port_map[:nginx_conf])
+
+PortMap::Hosts.update
+
+port_map[:locations].each do |location|
+  puts "Removed proxy mapping of #{port_map[:server_name]}#{location[:name]} to #{location[:proxy_pass]}"
+end
+
+PortMap::Nginx.reload

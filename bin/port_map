@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+require 'port_map'
+
+port = PortMap::Utilities.next_empty_port
+name = ENV['PORT_MAP_NAME']
+
+success = system("create_port_map #{port} #{name}")
+raise 'exception occurred during `create_port_map`' unless success
+
+port_removed = false
+
+Signal.trap('INT') do
+  system("remove_port_map #{name}")
+  port_removed = true
+end
+
+Signal.trap('TERM') do
+  system("remove_port_map #{name}")
+  port_removed = true
+end
+
+cmd = PortMap::Utilities.apply_open_port_option(port, ARGV.join(' '))
+system(PortMap::Utilities.shell_cmd_wrapper(cmd))
+
+at_exit do
+  system("remove_port_map #{name}") unless port_removed
+end

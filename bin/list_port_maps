@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+require 'port_map'
+
+puts JSON.pretty_generate(PortMap::Mappings.all)
