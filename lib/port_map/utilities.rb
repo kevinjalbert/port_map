@@ -7,7 +7,6 @@ module PortMap
     ZSH_CMD_STRING = "zsh -c 'source ~/.zshrc > /dev/null; PATH=%{path}; setopt aliases; eval %{cmd}'"
 
     STARTING_PORT_NUMBER = 20000
-    PORT_NUMBER_INCREMENT = 100
 
     def self.shell_cmd_wrapper(cmd)
       case ENV.fetch('SHELL')
@@ -35,9 +34,16 @@ module PortMap
     def self.next_empty_port
       highest_port = PortMap::Mappings.all.map do |port_map|
         port_map[:locations].detect { |location| location[:name] == '/' }[:proxy_pass].split(':').last.to_i
-      end.sort.reverse.first
+      end.sort.reverse.first || STARTING_PORT_NUMBER - 1
 
-      highest_port.nil? ? STARTING_PORT_NUMBER : highest_port + PORT_NUMBER_INCREMENT
+      highest_port += 1
+      highest_port += 1 while port_taken?(highest_port)
+
+      highest_port
+    end
+
+    def self.port_taken?(port)
+      system("lsof -i:#{port}", out: '/dev/null')
     end
   end
 end
