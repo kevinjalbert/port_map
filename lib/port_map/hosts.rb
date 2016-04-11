@@ -21,7 +21,7 @@ module PortMap
     def self.contents
       File.readlines(HOSTS_FILENAME).reject do |line|
         line.strip.match(/#{PORT_MAP_TRACK_COMMENT}$/)
-      end.join
+      end.join.strip
     end
   end
 end
