@@ -7,6 +7,10 @@ unless (1..65535).cover?(port.to_i)
   raise 'a valid port number must be provided as the first argument'
 end
 
+if PortMap::Utilities.port_taken?(port.to_i)
+  raise 'port number is already taken'
+end
+
 server_conf = nil
 if File.exist?(PortMap::NginxConf::PORT_MAP_CONF_FILENAME)
   server_conf = PortMap::NginxConf.from_file(port, File.new(PortMap::NginxConf::PORT_MAP_CONF_FILENAME))

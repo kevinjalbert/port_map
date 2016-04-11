@@ -70,57 +70,36 @@ RSpec.describe PortMap::Utilities do
       it 'returns STARTING_PORT_NUMBER' do
         expect(described_class.next_empty_port).to eq(described_class::STARTING_PORT_NUMBER)
       end
+
+      context 'next port taken by external process' do
+        it 'returns 1 port higher than the STARTING_PORT_NUMBER' do
+          allow(described_class).to receive(:port_taken?).and_return(true, false)
+          expect(described_class.next_empty_port).to eq(described_class::STARTING_PORT_NUMBER + 1)
+        end
+      end
     end
 
     context 'one port mapping exist' do
-      context 'with one location' do
-        let(:previous_highest_port_number) { 30000 }
-        let(:port_mappings) do
-          [
-            {
-              name: 'admin',
-              nginx_conf: '/usr/local/etc/nginx/servers/admin.port_map.conf',
-              server_name: 'admin.dev',
-              locations: [
-                {
-                  name: '/',
-                  proxy_pass: "http://127.0.0.1:#{previous_highest_port_number}"
-                }
-              ]
-            }
-          ]
-        end
-
-        it 'returns STARTING_PORT_NUMBER' do
-          expect(described_class.next_empty_port).to eq(previous_highest_port_number + described_class::PORT_NUMBER_INCREMENT)
-        end
+      let(:previous_highest_port_number) { 30000 }
+      let(:port_mappings) do
+        [
+          {
+            name: 'admin',
+            nginx_conf: '/usr/local/etc/nginx/servers/admin.port_map.conf',
+            server_name: 'admin.dev',
+            locations: [
+              {
+                name: '/',
+                proxy_pass: "http://127.0.0.1:#{previous_highest_port_number}"
+              }
+            ]
+          }
+        ]
       end
 
-      context 'with multiple locations' do
-        let(:previous_highest_port_number) { 30000 }
-        let(:port_mappings) do
-          [
-            {
-              name: 'admin',
-              nginx_conf: '/usr/local/etc/nginx/servers/admin.port_map.conf',
-              server_name: 'admin.dev',
-              locations: [
-                {
-                  name: '/',
-                  proxy_pass: "http://127.0.0.1:#{previous_highest_port_number}"
-                },
-                {
-                  name: '/test',
-                  proxy_pass: 'http://test.dev'
-                }
-              ]
-            }
-          ]
-        end
-
-        it 'returns STARTING_PORT_NUMBER' do
-          expect(described_class.next_empty_port).to eq(previous_highest_port_number + described_class::PORT_NUMBER_INCREMENT)
-        end
+      it 'returns 1 port higher than the highest' do
+        allow(described_class).to receive(:port_taken?).and_return(false)
+        expect(described_class.next_empty_port).to eq(previous_highest_port_number + 1)
       end
     end
 
@@ -135,7 +114,7 @@ RSpec.describe PortMap::Utilities do
             locations: [
               {
                 name: '/',
-                proxy_pass: 'http://127.0.0.1:20720'
+                proxy_pass: "http://127.0.0.1:#{previous_highest_port_number - 1}"
               }
             ]
           },
@@ -153,8 +132,9 @@ RSpec.describe PortMap::Utilities do
         ]
       end
 
-      it 'returns STARTING_PORT_NUMBER' do
-        expect(described_class.next_empty_port).to eq(previous_highest_port_number + described_class::PORT_NUMBER_INCREMENT)
+      it 'returns 1 port higher than the highest' do
+        allow(described_class).to receive(:port_taken?).and_return(false)
+        expect(described_class.next_empty_port).to eq(previous_highest_port_number + 1)
       end
     end
   end
