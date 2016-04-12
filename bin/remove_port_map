@@ -3,6 +3,10 @@ require 'port_map'
 
 name = ARGV[0] || Dir.pwd.split('/').last
 
+if File.exist?(PortMap::NginxConf::PORT_MAP_CONF_FILENAME)
+  name = PortMap::NginxConf.from_file('', File.new(PortMap::NginxConf::PORT_MAP_CONF_FILENAME)).name
+end
+
 port_map = PortMap::Mappings.all.detect do |element|
   element[:name] == name
 end
