@@ -95,10 +95,10 @@ Installing this gem provides four executable commands:
 ### `port_map`
 - `port_map <command>`
   1. Adjusts/Adds a dynamic port number on command (assuming command takes `-p <number>` or `--port <number>`).
-  2. Executes `create_port_map <dynamic_port_number>`
-    1. Uses a `.port_map.conf` nginx server configuration (with a `$PORT` placeholder present), for generated nginx configuration.
-    2. Using a name specified in the `PORT_MAP_NAME` environment variable.
-    1. Using a name specified from the current directory.
+  2. Executes `create_port_map <dynamic_port_number>`, which goes through the following in order until a name can be determined).
+    1. Uses a `.port_map.conf` nginx server configuration (which has a server name and `$PORT` placeholder present), this then becomes the nginx configuration.
+    2. Using a name specified in the `PORT_MAP_NAME` environment variable, this name is then used to generate a nginx configuration.
+    3. Using a name specified from the current directory, this name is then used to generate a nginx configuration.
   3. Updates `/etc/hosts` with new entry `127.0.0.1 determined_name.dev #port_map`.
   4. Reloads nginx -- `sudo nginx -s reload`.
   5. Executes `<command>`.
