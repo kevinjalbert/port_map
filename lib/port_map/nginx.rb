@@ -14,7 +14,9 @@ module PortMap
     end
 
     def self.servers_directory
-      conf_directory + File::Separator + 'servers'
+      directory = conf_directory + File::Separator + 'servers'
+      Dir.mkdir(directory) unless Dir.exist?(directory)
+      directory
     end
 
     def self.reload
