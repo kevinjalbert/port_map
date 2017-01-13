@@ -10,3 +10,6 @@ notifications:
   email: false
 
 script: bundle exec rspec
+
+after_success:
+  - bundle exec codeclimate-test-reporter

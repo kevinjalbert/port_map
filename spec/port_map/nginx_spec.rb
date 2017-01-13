@@ -43,11 +43,13 @@ RSpec.describe PortMap::Nginx do
     end
   end
 
-  describe '.servers_directory!' do
-    before { allow(described_class).to receive(:conf_directory) { '/temp/' } }
+  describe '.servers_directory' do
+    let (:tmp_dir) { Dir.mktmpdir }
+    before { allow(described_class).to receive(:conf_directory) { tmp_dir } }
 
-    it 'returns servers directory' do
+    it 'returns servers directory with created /servers/' do
       expect(described_class.servers_directory).to eq(described_class.conf_directory + File::Separator + 'servers')
+      expect(Dir.exist?(described_class.servers_directory)).to be_truthy
     end
   end
 end
